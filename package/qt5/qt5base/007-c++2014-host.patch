@@ -1,0 +1,11 @@
+--- a/mkspecs/features/default_post.prf    2016-04-12 21:22:03.030002140 +0000
++++ b/mkspecs/features/default_post.prf    2016-04-10 18:06:49.825076344 +0000
+@@ -95,7 +95,7 @@
+     !isEmpty(QMAKE_STRIP):QMAKE_POST_LINK = $$QMAKE_POST_LINK$$escape_expand(\\n\\t)$$quote($$QMAKE_STRIP $$DEBUGFILENAME)
+ }
+
+-c++11|c++14|c++1z {
++if(!host_build|!cross_compile):if(c++11|c++14|c++1z) {
+     c++1z:       cxxstd = CXX1Z
+     else: c++14: cxxstd = CXX14
+     else:        cxxstd = CXX11

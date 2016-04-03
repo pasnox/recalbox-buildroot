@@ -1,0 +1,56 @@
+#!/bin/sh
+
+export HOME=/recalbox/share/system
+#export LC_ALL=fr_FR.UTF-8
+PIDFILE=/var/run/quickstation.pid
+NAME="QuickStation"
+RUN_AS=`id -u root`
+CMD=/opt/qs-gui/qs-gui
+CMD_OPTS=
+LOGFILE=/recalbox/share/system/logs/quickstation.log
+
+# Qt configurations, see http://doc.qt.io/qt-5/embedded-linux.html
+
+#export QT_QPA_EGLFS_DEBUG=1
+#export QT_QPA_ENABLE_TERMINAL_KEYBOARD=1
+export QT_LOGGING_RULES="qt.qpa.input=true;qt.sdljoystick=true;qml=true"
+#export QT_QPA_EGLFS_DISABLE_INPUT=1
+
+# evdev, libinput or tslib
+# Without libinput:
+# Parameters like the device node name can be set in the environment variables
+# - QT_QPA_EVDEV_MOUSE_PARAMETERS
+# - QT_QPA_EVDEV_KEYBOARD_PARAMETERS
+# - QT_QPA_EVDEV_TOUCHSCREEN_PARAMETERS
+# Additionally, the built-in input handlers can be disabled by setting
+# QT_QPA_EGLFS_DISABLE_INPUT to 1.
+# On some touch screens the coordinates must be rotated, which is done by setting
+# QT_QPA_EVDEV_TOUCHSCREEN_PARAMETERS to rotate=180.
+
+do_start() {
+    start-stop-daemon --start --background --user $RUN_AS --pidfile $PIDFILE --make-pidfile --chuid $RUN_AS --startas $CMD -- $CMD_OPTS
+}
+
+do_stop() {
+    start-stop-daemon --stop --pidfile $PIDFILE
+}
+
+case "$1" in
+    start)
+        recallog "Starting $NAME"
+        do_start
+    ;;
+    stop)
+        recallog "Stopping $NAME"
+        do_stop
+    ;;
+    restart|reload)
+        recallog "Restarting $NAME"
+        do_stop
+        do_start
+    ;;
+    *)
+        echo "Usage: $0 {start|stop|restart}"
+        exit 2
+esac
+exit $?
